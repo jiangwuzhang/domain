@@ -22,11 +22,11 @@ function start_shuangpin(){
 			ORDER BY id DESC LIMIT 1");
 }
 
-function update($sql_str){
+function update($get_sql){
 	global $conn;
 	$vector = 1;
 	do {
-		$data = get($sql_str);
+		$data = get($get_sql);
 		if ($data !== NULL){
 			$whois = whois_query($data['domain']);
 			if (is_numeric($whois)){
