@@ -1,5 +1,6 @@
 #!/usr/bin/php
 <?php
+define('RUNTIME', 59);
 define('AVAILABLE', '0000-00-00 00:00:00');
 $whois_serveurs = array(
 	"ac" => "whois.nic.ac", 
@@ -147,6 +148,7 @@ function start_sipinszm(){
 function update($get_sql){
 	global $conn;
 	$vector = 1;
+	$start_time = time();
 	do {
 		$data = get($get_sql);
 		if ($data !== NULL){
@@ -170,7 +172,7 @@ function update($get_sql){
 		} else {
 			$vector = 0;
 		}
-	} while ($vector !== 0);
+	} while ($vector !== 0 && (time() - $start_time) < RUNTIME);
 }
 
 function whois_query($domain){

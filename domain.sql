@@ -8,12 +8,15 @@ CREATE TABLE `domain_list` (
   `available` tinyint(4) NOT NULL DEFAULT '0',
   `last_modified` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `http_code` int(11) NOT NULL DEFAULT '0',
+  `resp` varchar(2550) NOT NULL,
+  `type` varchar(30) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `chinese` (`chinese`),
   KEY `available` (`available`),
   KEY `domain` (`domain`),
-  KEY `http_code` (`http_code`)
-) ENGINE=MyISAM AUTO_INCREMENT=157203 DEFAULT CHARSET=utf8;
+  KEY `http_code` (`http_code`),
+  KEY `type` (`type`)
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `whois`;
 CREATE TABLE `whois` (
