@@ -1,5 +1,6 @@
 #!/usr/bin/php
 <?php
+define('AVAILABLE', 3);
 $argv = $_SERVER['argv'];
 $conn = mysql_connect('127.0.0.1', 'root', '123123');
 mysql_select_db('nogrp_domain');
@@ -11,42 +12,65 @@ function main(){
 	
 }
 
-function search_for_aliyun(){
+function start_number5(){
+	update("SELECT * FROM domain_list WHERE http_code=0 AND type='number5' 
+			ORDER BY id DESC LIMIT 1");
+}
+
+function start_shuangpin(){
+	update("SELECT * FROM domain_list WHERE http_code=0 AND type='shuangpin'
+			ORDER BY id DESC LIMIT 1");
+}
+
+function update($sql_str){
 	global $conn;
-	$stdapi = 'http://panda.www.net.cn/cgi-bin/check.cgi?area_domain=';
-	$stdapi = 'http://avatar.46944.com/whois.php?domain=';
-	$available = 'Domain name is available';
-	$stack = 1;
+	$vector = 1;
 	do {
-		$query = mysql_query("SELECT * FROM domain_list WHERE http_code=0 ORDER BY id DESC LIMIT 1");
-		if ($res = mysql_fetch_assoc($query)){
-			$domain = $res['domain'];
-			$last_modified = date("Y-m-d H:i:s");
-			$data = curl_get($stdapi.$domain);
-			$http_code = $data['info']['http_code'];
-			if ($http_code === 200){
-				$resp = mysql_real_escape_string($data['content']);
-				$json = json_decode($data['content'], true);
-				if ($json['status'] == 1 && $json['status'] == 3){
-					$sql_str = "UPDATE domain_list SET http_code={$http_code},last_modified='{$last_modified}',";
-                    $sql_str .= "available=1,resp='{$resp}' WHERE id={$res['id']}";
-                    echo json_encode($json)." # {$domain}\n";
-                    mysql_query($sql_str);
+		$data = get($sql_str);
+		if ($data !== NULL){
+			$whois = whois_query($data['domain']);
+			if (is_numeric($whois)){
+				echo "{$data['domain']} http_code {$whois}\n";
+			} else {
+				$resp = json_encode($whois);
+				$resp = mysql_real_escape_string($resp);
+				$last_modified = date("Y-m-d H:i:s");
+				if ($whois['code'] == AVAILABLE){
+					$sql_str = "UPDATE domain_list SET http_code=200,last_modified='{$last_modified}',";
+	                $sql_str .= "available=1,resp='{$resp}' WHERE id={$data['id']}";
+	                echo json_encode($whois)." # {$data['domain']}\n";
+	                mysql_query($sql_str);
 				} else {
-					$sql_str = "UPDATE domain_list SET http_code={$http_code},last_modified='{$last_modified}',";
-                    $sql_str .= "available=77,resp='{$resp}' WHERE id={$res['id']}";
-                    unset($json['whois_data']);
-                    echo json_encode($json)." # {$domain}\n";
+					$sql_str = "UPDATE domain_list SET http_code=200,last_modified='{$last_modified}',";
+                    $sql_str .= "available=77,resp='{$resp}' WHERE id={$data['id']}";
+                    unset($whois['whois_data']);
+                    echo json_encode($whois)." # {$data['domain']}\n";
                     mysql_query($sql_str);
 				}
-			} else {
-				echo "{$domain} http_code {$http_code}\n";
 			}
 		} else {
-			$stack = 0;
+			$vector = 0;
 		}
-		sleep(1);
-	} while ($stack != 0);
+	} while ($vector !== 0);
+}
+
+function whois_query($domain){
+	$api = sprintf("http://avatar.46944.com/whois.php?domain=%s", $domain);
+	$data = curl_get($api);
+	$http_code = $data['info']['http_code'];
+	if ($http_code === 200){
+		return json_decode($data['content'], true);
+	}
+	return $http_code;
+}
+
+function get($sql_str){
+	global $conn;
+	$query = mysql_query($sql_str);
+	if ($res = mysql_fetch_assoc($query)){
+		return $res;
+	}
+	return NULL;
 }
 
 function dic2table(){
@@ -76,6 +100,17 @@ function dic2table(){
 			mysql_query($sql_str);
 			echo $sql_str."\n";
 		}
+	}
+}
+
+function rand5(){
+	global $conn;
+	for ($i = 0; $i < 100000; ++$i){
+		$domain = sprintf("%'.05d.com", $i);
+		$sql_str = "INSERT IGNORE INTO domain_list(`chinese`,`chinese_total`,`domain`,`domain_total`)";
+		$sql_str .= " VALUES('5位数字域名({$domain})',85,'{$domain}',5)";
+		mysql_query($sql_str);
+		echo $sql_str."\n";
 	}
 }
 
