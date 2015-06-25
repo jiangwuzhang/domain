@@ -1,6 +1,113 @@
 #!/usr/bin/php
 <?php
-define('AVAILABLE', 3);
+define('AVAILABLE', '0000-00-00 00:00:00');
+$whois_serveurs = array(
+	"ac" => "whois.nic.ac", 
+	"al" => "whois.ripe.net", 
+	"am" => "whois.amnic.net", 
+	"as" => "whois.nic.as",
+	"at" => "whois.ripe.net",
+	"au" => "whois.aunic.net",
+	"az" => "whois.ripe.net",
+	"ba" => "whois.ripe.net",
+	"be" => "whois.ripe.net",
+	"bg" => "whois.ripe.net",
+	//"biz" => "whois.neulevel.biz",
+	"biz" => "whois.nic.biz",
+	"br" => "whois.registro.br",
+	"by" => "whois.ripe.net",
+	"ca" => "whois.cira.ca",
+	"cc" => "whois.nic.cc",
+	"ch" => "whois.nic.ch",
+	"ck" => "whois.ck-nic.org.ck",
+	"cn" => "whois.cnnic.net.cn",
+	"com" => "whois.crsnic.net",
+	"cx" => "whois.nic.cx",
+	"cy" => "whois.ripe.net",
+	"cz" => "whois.nic.cz",
+	"de" => "whois.denic.de",
+	"dk" => "whois.dk-hostmaster.dk",
+	"dz" => "whois.ripe.net",
+	"edu" => "rs.internic.net",
+	"ee" => "whois.ripe.net",
+	"eg" => "whois.ripe.net",
+	"es" => "whois.ripe.net",
+	"eu" => "whois.eu",
+	"fi" => "whois.ripe.net",
+	"fj" => "whois.usp.ac.fj",
+	"fo" => "whois.ripe.net",
+	"fr" => "whois.nic.fr",
+	"gb" => "whois.ripe.net",
+	"ge" => "whois.ripe.net",
+	"gov" => "whois.nic.gov",
+	"gr" => "whois.ripe.net",
+	"gs" => "whois.adamsnames.tc",
+	"hk" => "whois.hknic.net.hk",
+	"hm" => "whois.registry.hm",
+	"hr" => "whois.ripe.net",
+	"hu" => "whois.ripe.net",
+	"id" => "whois.idnic.net.id",
+	"ie" => "whois.domainregistry.ie",
+	"info" => "whois.afilias.net",
+	"int" => "whois.isi.edu",
+	"il" => "whois.ripe.net",
+	"is" => "whois.isnet.is",
+	"it" => "whois.nic.it",
+	"jp" => "whois.nic.ad.jp",
+	"ke" => "whois.rg.net",
+	"kg" => "whois.domain.kg",
+	"kr" => "whois.nic.or.kr",
+	"kz" => "whois.domain.kz",
+	"li" => "whois.nic.li",
+	"lk" => "whois.nic.lk",
+	"lt" => "whois.ripe.net",
+	"lu" => "whois.ripe.net",
+	"lv" => "whois.ripe.net",
+	"ma" => "whois.ripe.net",
+	"md" => "whois.ripe.net",
+	"mil" => "whois.nic.mil",
+	"mk" => "whois.ripe.net",
+	"mm" => "whois.nic.mm",
+	"ms" => "whois.adamsnames.tc",
+	"mt" => "whois.ripe.net",
+	"mx" => "whois.nic.mx",
+	"net" => "rs.internic.net",
+	"nl" => "whois.domain-registry.nl",
+	"no" => "whois.norid.no",
+	"nu" => "whois.nic.nu",
+	"nz" => "whois.domainz.net.nz",
+	"org" => "whois.pir.org",
+	"pl" => "whois.ripe.net",
+	"pk" => "whois.pknic.net.pk",
+	"pt" => "whois.ripe.net",
+	"ro" => "whois.ripe.net",
+	"ru" => "whois.ripn.ru",
+	"se" => "whois.nic-se.se",
+	"sg" => "whois.nic.net.sg",
+	"si" => "whois.ripe.net",
+	"sh" => "whois.nic.sh",
+	"sk" => "whois.ripe.net",
+	"sm" => "whois.ripe.net",
+	"st" => "whois.nic.st",
+	"su" => "whois.ripe.net",
+	"tc" => "whois.adamsnames.tc",
+	"tf" => "whois.adamsnames.tc",
+	"tj" => "whois.nic.tj",
+	"th" => "whois.thnic.net",
+	"tm" => "whois.nic.tm",
+	"tn" => "whois.ripe.net",
+	"to" => "whois.tonic.to",
+	"tr" => "whois.ripe.net",
+	"tw" => "whois.twnic.net",
+	"ua" => "whois.ripe.net",
+	"uk" => "whois.nic.uk",
+	"us" => "whois.isi.edu",
+	"va" => "whois.ripe.net",
+	"vg" => "whois.adamsnames.tc",
+	"ws" => "whois.nic.ws",
+	"yu" => "whois.ripe.net",
+	"za" => "whois.frd.ac.za"
+);
 $argv = $_SERVER['argv'];
 $conn = mysql_connect('127.0.0.1', 'root', '123123');
 mysql_select_db('nogrp_domain');
@@ -9,7 +116,12 @@ mysql_query('SET NAMES utf8');
 (!empty($argv[1]) && function_exists($argv[1])) ? call_user_func($argv[1]) : main();
 
 function main(){
-	
+	do {
+		$data = get("SELECT * FROM domain_list WHERE http_code=0 AND type='number5' 
+			ORDER BY id DESC LIMIT 1");
+		$whois = whois_query($data['domain']);
+		print_r($whois);exit;
+	} while (true);
 }
 
 function start_number5(){
@@ -22,6 +134,16 @@ function start_shuangpin(){
 			ORDER BY id DESC LIMIT 1");
 }
 
+function start_sanpin(){
+	update("SELECT * FROM domain_list WHERE http_code=0 AND type='sanpin'
+			ORDER BY id DESC LIMIT 1");
+}
+
+function start_sipinszm(){
+	update("SELECT * FROM domain_list WHERE http_code=0 AND type='sipinszm'
+			ORDER BY id DESC LIMIT 1");
+}
+
 function update($get_sql){
 	global $conn;
 	$vector = 1;
@@ -29,22 +151,19 @@ function update($get_sql){
 		$data = get($get_sql);
 		if ($data !== NULL){
 			$whois = whois_query($data['domain']);
-			if (is_numeric($whois)){
-				echo "{$data['domain']} http_code {$whois}\n";
+			if (empty($whois)){
+				echo "{$data['domain']} whois was empty\n";
 			} else {
-				$resp = json_encode($whois);
-				$resp = mysql_real_escape_string($resp);
 				$last_modified = date("Y-m-d H:i:s");
-				if ($whois['code'] == AVAILABLE){
+				if ($whois['creation_date'] == AVAILABLE){
 					$sql_str = "UPDATE domain_list SET http_code=200,last_modified='{$last_modified}',";
-	                $sql_str .= "available=1,resp='{$resp}' WHERE id={$data['id']}";
-	                echo json_encode($whois)." # {$data['domain']}\n";
+	                $sql_str .= "available=1 WHERE id={$data['id']}";
+	                echo "creation_date:{$whois['creation_date']} # {$data['domain']}\n";
 	                mysql_query($sql_str);
 				} else {
 					$sql_str = "UPDATE domain_list SET http_code=200,last_modified='{$last_modified}',";
-                    $sql_str .= "available=77,resp='{$resp}' WHERE id={$data['id']}";
-                    unset($whois['whois_data']);
-                    echo json_encode($whois)." # {$data['domain']}\n";
+                    $sql_str .= "available=77 WHERE id={$data['id']}";
+                    echo "creation_date:{$whois['creation_date']} # {$data['domain']}\n";
                     mysql_query($sql_str);
 				}
 			}
@@ -55,6 +174,45 @@ function update($get_sql){
 }
 
 function whois_query($domain){
+	global $conn;
+	$explode = explode('.', $domain);
+	$query = mysql_query("SELECT * FROM whois WHERE domain='{$explode[0]}' AND suffix='{$explode[1]}'");
+	if ($res = mysql_fetch_assoc($query)){
+		return $res;
+	} else {
+		$data = socket_whois($domain);
+		if (!empty($data) && $data['available'] === 77){
+			$creation_date = '';
+			$expiration_date = '';
+			if (preg_match("/Creation Date:(.*)/i", $data['whois'], $matches)){
+				$creation_date = trim($matches[1]);
+				$creation_date = strtotime($creation_date);
+				$creation_date = date("Y-m-d H:i:s", $creation_date);
+			}
+			if (preg_match("/Expiration Date:(.*)/i", $data['whois'], $matches)){
+				$expiration_date = trim($matches[1]);
+				$expiration_date = strtotime($expiration_date);
+				$expiration_date = date("Y-m-d H:i:s", $expiration_date);
+			}
+			$sql_str = "INSERT IGNORE INTO whois(`domain`,`suffix`,`creation_date`,`expiration_date`) ";
+			$sql_str .= "VALUES('{$explode[0]}','{$explode[1]}','{$creation_date}','{$expiration_date}')";
+			mysql_query($sql_str);
+			return array(
+						'domain' => $explode[0],
+						'suffix' => $explode[1],
+						'creation_date' => $creation_date,
+						'expiration_date' => $creation_date
+					);
+		} else if ($data['available'] === 1){
+			$sql_str = "INSERT IGNORE INTO whois(`domain`,`suffix`) 
+				VALUES('{$explode[0]}','{$explode[1]}')";
+			mysql_query($sql_str);
+			return array("creation_date" => "0000-00-00 00:00:00");
+		} else {
+			return NULL;
+		}
+	}
+	/*
 	$api = sprintf("http://avatar.46944.com/whois.php?domain=%s", $domain);
 	$data = curl_get($api);
 	$http_code = $data['info']['http_code'];
@@ -62,6 +220,7 @@ function whois_query($domain){
 		return json_decode($data['content'], true);
 	}
 	return $http_code;
+	*/
 }
 
 function get($sql_str){
@@ -147,6 +306,33 @@ function asc_to_pinyin($asc,&$pyarr) {
 		foreach($pyarr as $id => $p) {
 		    if($id >= $asc)return $p;
 		}
+	}
+}
+
+function socket_whois($domain){
+	global $whois_serveurs;
+	$parseur = explode('.', $domain);
+	$host = $whois_serveurs[strtolower($parseur[count($parseur)-1])];
+	$buff = '';
+	$data = array();
+	if (!empty($host)){
+		$fp = fsockopen($host, 43, $errno, $errstr, 10);
+		fputs($fp, $domain."\r\n");
+		while (!feof($fp)){
+			$buff .= fgets($fp, 128);
+		}
+		fclose($fp);
+		if (ereg("No match for", $buff) || ereg("NOT FOUND", $buff) || 
+				ereg("Status:      FREE", $buff) || ereg("No entries found", $buff) || 
+				ereg("Not found", $buff) || ereg("AVAIL", $buff)){
+			$data['available'] = 1;
+		} else {
+			$data['available'] = 77;
+			$data['whois'] = $buff;
+		}
+		return $data;
+	} else {
+		return NULL;
 	}
 }
 

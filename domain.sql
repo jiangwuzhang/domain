@@ -13,4 +13,16 @@ CREATE TABLE `domain_list` (
   KEY `available` (`available`),
   KEY `domain` (`domain`),
   KEY `http_code` (`http_code`)
-) ENGINE=MyISAM AUTO_INCREMENT=157203 DEFAULT CHARSET=utf8
+) ENGINE=MyISAM AUTO_INCREMENT=157203 DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `whois`;
+CREATE TABLE `whois` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `domain` varchar(30) NOT NULL DEFAULT '',
+  `suffix` char(4) NOT NULL DEFAULT '',
+  `creation_date` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `expiration_date` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `update_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `domain_suffix` (`domain`, `suffix`)
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
