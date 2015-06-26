@@ -16,7 +16,7 @@ CREATE TABLE `domain_list` (
   KEY `domain` (`domain`),
   KEY `http_code` (`http_code`),
   KEY `type` (`type`)
-) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `whois`;
 CREATE TABLE `whois` (
@@ -28,4 +28,4 @@ CREATE TABLE `whois` (
   `update_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
   PRIMARY KEY (`id`),
   UNIQUE KEY `domain_suffix` (`domain`, `suffix`)
-) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;

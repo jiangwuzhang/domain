@@ -117,12 +117,7 @@ mysql_query('SET NAMES utf8');
 (!empty($argv[1]) && function_exists($argv[1])) ? call_user_func($argv[1]) : main();
 
 function main(){
-	do {
-		$data = get("SELECT * FROM domain_list WHERE http_code=0 AND type='number5' 
-			ORDER BY id DESC LIMIT 1");
-		$whois = whois_query($data['domain']);
-		print_r($whois);exit;
-	} while (true);
+	socket_whois("jiangwuzhang.com");
 }
 
 function start_number5(){
@@ -184,8 +179,8 @@ function whois_query($domain){
 	} else {
 		$data = socket_whois($domain);
 		if (!empty($data) && $data['available'] === 77){
-			$creation_date = '';
-			$expiration_date = '';
+			$creation_date = '0000-00-00 00:00:00';
+			$expiration_date = '0000-00-00 00:00:00';
 			if (preg_match("/Creation Date:(.*)/i", $data['whois'], $matches)){
 				$creation_date = trim($matches[1]);
 				$creation_date = strtotime($creation_date);
@@ -275,6 +270,52 @@ function rand5(){
 	}
 }
 
+function general_shuangpin(){
+	global $conn;
+	$data = file_get_contents("gb-pinyin.table");
+	$data = explode("\n", $data);
+	$pinyin = array();
+	foreach ($data as $key => $value) {
+		$_tmp = explode("\t", $value);
+		$pinyin[] = $_tmp[0];
+	}
+	foreach ($pinyin as $first) {
+		foreach ($pinyin as $second){
+			$domain = $first.$second;
+			$size_t = strlen($domain);
+			$sql_str = "INSERT IGNORE INTO domain_list(`domain`,`domain_total`,`type`) ";
+			$sql_str .= "VALUES('{$domain}.com',{$size_t},'shuangpin')";
+			mysql_query($sql_str);
+			echo $sql_str."\n";
+		}
+	}
+}
+
+function general_sanpin(){
+	global $argv, $conn;
+	$dic = dirname(__FILE__)."/dic/".$argv[2];
+	if (!file_exists($dic)){
+		exit("no file input\n");
+	}
+	$words = file_get_contents($dic);
+	$words = explode("\n", $words);
+	foreach ($words as $key => $value) {
+		$value = trim($value);
+		if ($value !== ''){
+			$arr_py = utf8_to_pinyin($value);
+			$str_py = implode('', $arr_py);
+			$chinese_total = mb_strlen($value, 'utf-8');
+			if ($chinese_total == 3){
+				$domain_total = strlen($str_py);
+				$sql_str = "INSERT IGNORE INTO domain_list(`chinese`,`chinese_total`,`domain`,`domain_total`) VALUES";
+				$sql_str .= "('{$value}',{$chinese_total},'{$str_py}.com',{$domain_total})";
+				mysql_query($sql_str);
+				echo $sql_str."\n";
+			}
+		}
+	}
+}
+
 function utf8_to_pinyin($txt) {
         $txt = iconv('utf-8', 'gbk//IGNORE', $txt);
         $l = strlen($txt);
@@ -324,10 +365,15 @@ function socket_whois($domain){
 			$buff .= fgets($fp, 128);
 		}
 		fclose($fp);
+		echo $buff."\n";exit;
+		/*
 		if (ereg("No match for", $buff) || ereg("NOT FOUND", $buff) || 
 				ereg("Status:      FREE", $buff) || ereg("No entries found", $buff) || 
 				ereg("Not found", $buff) || ereg("AVAIL", $buff)){
+		*/
+		if (ereg("No match for", $buff)){ 	//for com
 			$data['available'] = 1;
+			$data['whois'] = $buff;
 		} else {
 			$data['available'] = 77;
 			$data['whois'] = $buff;
