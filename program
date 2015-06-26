@@ -365,7 +365,6 @@ function socket_whois($domain){
 			$buff .= fgets($fp, 128);
 		}
 		fclose($fp);
-		echo $buff."\n";exit;
 		/*
 		if (ereg("No match for", $buff) || ereg("NOT FOUND", $buff) || 
 				ereg("Status:      FREE", $buff) || ereg("No entries found", $buff) || 
