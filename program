@@ -307,8 +307,8 @@ function general_sanpin(){
 			$chinese_total = mb_strlen($value, 'utf-8');
 			if ($chinese_total == 3){
 				$domain_total = strlen($str_py);
-				$sql_str = "INSERT IGNORE INTO domain_list(`chinese`,`chinese_total`,`domain`,`domain_total`) VALUES";
-				$sql_str .= "('{$value}',{$chinese_total},'{$str_py}.com',{$domain_total})";
+				$sql_str = "INSERT IGNORE INTO domain_list(`chinese`,`chinese_total`,`domain`,`domain_total`,`type`) VALUES";
+				$sql_str .= "('{$value}',{$chinese_total},'{$str_py}.com',{$domain_total},'sanpin')";
 				mysql_query($sql_str);
 				echo $sql_str."\n";
 			}
