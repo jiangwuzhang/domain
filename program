@@ -283,8 +283,8 @@ function general_shuangpin(){
 		foreach ($pinyin as $second){
 			$domain = $first.$second;
 			$size_t = strlen($domain);
-			$sql_str = "INSERT IGNORE INTO domain_list(`domain`,`domain_total`,`type`) ";
-			$sql_str .= "VALUES('{$domain}.com',{$size_t},'shuangpin')";
+			$sql_str = "INSERT IGNORE INTO domain_list(`chinese`,`domain`,`domain_total`,`type`) ";
+			$sql_str .= "VALUES('cn_{$domain}','{$domain}.com',{$size_t},'shuangpin')";
 			mysql_query($sql_str);
 			echo $sql_str."\n";
 		}
