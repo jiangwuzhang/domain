@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 define('RUNTIME', 59);
-define('AVAILABLE', '0000-00-00 00:00:00');
+define('AVAILABLE', 1);
 $whois_serveurs = array(
 	"ac" => "whois.nic.ac", 
 	"al" => "whois.ripe.net", 
@@ -152,7 +152,7 @@ function update($get_sql){
 				echo "{$data['domain']} whois was empty\n";
 			} else {
 				$last_modified = date("Y-m-d H:i:s");
-				if ($whois['creation_date'] == AVAILABLE){
+				if ($whois['available'] == AVAILABLE){
 					$sql_str = "UPDATE domain_list SET http_code=200,last_modified='{$last_modified}',";
 	                $sql_str .= "available=1 WHERE id={$data['id']}";
 	                echo "creation_date:{$whois['creation_date']} # {$data['domain']}\n";
@@ -178,7 +178,6 @@ function whois_query($domain){
 		return $res;
 	} else {
 		$data = socket_whois($domain);
-		/*
 		if (!empty($data) && $data['available'] === 77){
 			$creation_date = '0000-00-00 00:00:00';
 			$expiration_date = '0000-00-00 00:00:00';
@@ -196,18 +195,17 @@ function whois_query($domain){
 			$sql_str .= "VALUES('{$explode[0]}','{$explode[1]}','{$creation_date}','{$expiration_date}')";
 			mysql_query($sql_str);
 			return array(
+						'available' => $data['available'],
 						'domain' => $explode[0],
 						'suffix' => $explode[1],
 						'creation_date' => $creation_date,
 						'expiration_date' => $creation_date
 					);
 		} else if ($data['available'] === 1){
-		*/
-		if ($data['available'] === 1){
 			$sql_str = "INSERT IGNORE INTO whois(`domain`,`suffix`) 
 				VALUES('{$explode[0]}','{$explode[1]}')";
 			mysql_query($sql_str);
-			return array("creation_date" => "0000-00-00 00:00:00");
+			return array("creation_date" => "0000-00-00 00:00:00", 'available' => $data['available']);
 		} else {
 			return NULL;
 		}
